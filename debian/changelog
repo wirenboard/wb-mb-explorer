@@ -1,3 +1,10 @@
+wb-mb-explorer (1.2.7) stable; urgency=medium
+
+  * Custom function for inputbox was created
+  * Item "Update FW to specified version" was added in FW update menu
+
+ -- Dmitry Vorobjev <d.vorobjev@wirenboard.ru>  Sun, 20 Mar 2022 17:48:36 +0300
+
 wb-mb-explorer (1.2.6) stable; urgency=medium
 
   * Option --clear was deleted from infobox dialog to display message

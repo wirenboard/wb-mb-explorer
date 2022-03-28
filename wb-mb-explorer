@@ -75,6 +75,10 @@ show_info_box() {
     $DIALOG --backtitle "$DIALOG_BACKTITLE" --title "INFO" --infobox "$1" 5 50
 }
 
+show_input_box() {
+    $DIALOG --clear --backtitle "$DIALOG_BACKTITLE" --title "$1" --inputbox "$2" 16 51 2>$TMP_FILE
+}
+
 read_communication_settings() {
 
     if [[ -f $SETTINGS_FILE ]]; then
@@ -218,7 +222,7 @@ set_stopbits_dialog() {
 }
 
 set_address_dialog() {
-    $DIALOG --clear --title "Enter address of Modbus device" --inputbox "Enter address of Modbus device you wnat to work with (from 1 to 247)" 16 51 2>$TMP_FILE
+    show_input_box "Enter address of Modbus device" "Enter address of Modbus device you want to work with (from 1 to 247)"
 
     case $? in
     $DIALOG_OK)
@@ -235,7 +239,7 @@ set_address_dialog() {
 
 set_mb_register() {
 
-    $DIALOG --clear --title "Enter address of Modbus register" --inputbox "Enter address of Modbus register in decimal or hex (0x12345)" 16 51 2>$TMP_FILE
+    show_input_box "Enter address of Modbus register" "Enter address of Modbus register in decimal (100) or hex (0x64)"
 
     case $? in
     $DIALOG_OK)
@@ -426,7 +430,7 @@ write_register() {
         ;;
     esac
 
-    $DIALOG --clear --title "WRITE REGISTER" --inputbox "Enter new register value in decimal (100) or hex (0x64)" 16 51 2>$TMP_FILE
+    show_input_box "WRITE REGISTER" "Enter new register value in decimal (100) or hex (0x64)"
 
     local input_value="$(cat $TMP_FILE)"
 
@@ -856,6 +860,7 @@ menu_fw_update() {
             "Force device FW update" "Force update FW of device with address $MB_ADDRESS at port $COM_PORT from repository" \
             "Recover device FW" "Recover firmware of device with address $MB_ADDRESS at port $COM_PORT from repository" \
             "Update FW of all devices" "Update FW of all devices configured in controller from repository" \
+            "Update FW to specified version" "Update FW of device with address $MB_ADDRESS at port $COM_PORT to specified version" \
             "Update FW using file" "Update FW of device with address $MB_ADDRESS at port $COM_PORT using file" 2>$TMP_FILE
 
         case $? in
@@ -865,6 +870,18 @@ menu_fw_update() {
             "Force device FW update") update_device_fw_from_internet "update-fw --force" ;;
             "Recover device FW") update_device_fw_from_internet "recover" ;;
             "Update FW of all devices") update_all_devices_fw_from_internet ;;
+            "Update FW to specified version")
+                show_input_box "Enter FW version" "Enter FW version you wnt to flash to device using format X.X.X (for example 1.2.34)"
+                case $? in
+                $DIALOG_OK)
+                    if [[ -n "$(cat $TMP_FILE)" ]]; then
+                        update_device_fw_from_internet "update-fw --version" "$(cat $TMP_FILE)"
+                    else
+                        show_msg_box "ERROR" "Wrong new fw version was entered!"
+                    fi
+                    ;;
+                esac
+                ;;
             "Update FW using file") update_fw_using_file ;;
             esac
             ;;
@@ -875,6 +892,7 @@ menu_fw_update() {
         Force device FW update - like Device FW update, but reflashes device even it has the newest FW version already\n\n
         Recover device FW - recovers FW of device with current address. Use it if device is in bootloader mode\n\n
         Update FW of all devices - like Device FW update, but for ALL devices configured in Wirenboard controller\n\n
+        Update FW to specified version - like Device FW update, but specified FW version will be used\n\n
         Update FW using file - updates FW of device with current communication settings using specified FW file\n"
             ;;
         *) return ;;
@@ -897,6 +915,10 @@ update_device_fw_from_internet() {
     "update-fw --force")
         window_title="FORCE DEVICE FW UPDATE"
         button_title="Force firmware update"
+        ;;
+    "update-fw --version")
+        window_title="DEVICE SPECIFIED VERSION FW UPDATE"
+        button_title="Update firmware to specified version"
         ;;
     "recover")
         window_title="DEVICE FW RECOVER"
@@ -923,7 +945,7 @@ update_device_fw_from_internet() {
     case $? in
     $DIALOG_OK)
 
-        wb-mcu-fw-updater $1 -a$MB_ADDRESS $COM_PORT 2>&1 | tee -a $TMP_FILE
+        wb-mcu-fw-updater $1 $2 -a$MB_ADDRESS $COM_PORT | tee -a $TMP_FILE
         sleep 2
         sed -i -e 's/[[:cntrl:]]//g' -e 's/\[......//g' -e 's/\[..//g' $TMP_FILE
 
