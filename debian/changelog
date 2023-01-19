@@ -1,3 +1,9 @@
+wb-mb-explorer (1.2.8) stable; urgency=medium
+
+  * Fix error converting hex to dec
+
+ -- Nikolay Korotkiy <nikolay.korotkiy@wirenboard.com>  Thu, 19 Jan 2023 12:17:00 +0400
+
 wb-mb-explorer (1.2.7) stable; urgency=medium
 
   * Custom function for inputbox was created
