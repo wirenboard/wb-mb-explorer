@@ -290,7 +290,7 @@ modbus_read_hex_value() {
 value_hex_to_dec() {
     if [[ "$1" = "0x0000" ]]; then
         echo "0"
-    else
+    elif [[ -n $1 ]]; then
         echo $((16#$1))
     fi
 }
