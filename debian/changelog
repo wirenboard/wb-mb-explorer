@@ -1,6 +1,6 @@
 wb-mb-explorer (1.2.10) stable; urgency=medium
 
-  * Switch the license to The WB License (MIT-WB): Automation Technologies, LLC (Wiren Board)
+  * Switch the license to The WB License (MIT-WB): Wiren Board
     as the copyright holder, 2021 as the first publication year, use restricted to Wiren Board equipment
   * Fill debian/copyright in the DEP-5 format
 
